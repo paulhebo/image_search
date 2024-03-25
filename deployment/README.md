@@ -50,16 +50,6 @@ cdk bootstrap aws://[your-account-id]/[your-region]
 you can install the required dependencies.
 
 
-4. Deploy stacks Settings in cdk.json
-Configurate parameters:
-```
-    "embedding_endpoint_name"
-    "llm_embedding_name"
-    "language"
-    "index"
-```
-
-
 5. Below command will validate the environment and generate CloudFormation.json 
 ```
 cdk synth
@@ -68,10 +58,7 @@ If everything is good, then
 ```
 cdk deploy --all
 ```
-6. The CDK deployment will provide 3 CloudFormation stacks with relevant resouces like Lambda, API Gateway, OpenSearch instance and SageMaker notebook etc.
-
-7. Login with Secret Manager account and password in OpenSearch. Finish the settings with manual part inside
-8. Open Sagemaker Jyputerlab instance and the repositories will be automatically downloaded into the environment, play with relevant notebook scripts to deploy Sagemaker endpoint.For notebook setup, please refer the guideline named with "DeployGuide-LLM&Search-V2.pdf" in the root directory
+6. The CDK deployment will provide CloudFormation stacks with relevant resouces like Lambda, API Gateway and SageMaker notebook etc.
 
 ### Clean Up
 When you don't need the environment and want to clean it up, run:
@@ -88,14 +75,3 @@ Then resources which are not created by cdk, need to manually clean it up. Like 
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk docs`        open CDK documentation
-
- for cdk developer guideline please refer: https://docs.aws.amazon.com/cdk/api/v2/python/index.html 
-
-### Trouble Shooting
-
- | Problem                 |          Countermeasure    |
-| ------------------------ | -------------------------- |
-| In China the LLM model is too slow for deployment  due to network issue         | Under the Jupyter notebook LLM_Model folder, there's "code" and requirements.txt file, add China source for the dependency lib, e.g. put "-i https://pypi.tuna.tsinghua.edu.cn/simple" in the first line of the requirements.txt file                                |
-| CORS error for China API Gateway endpoint accessing | Need to contact responsible AWS account team to query about how to open the 443/80/8080 port by legal requirement |
-
-
