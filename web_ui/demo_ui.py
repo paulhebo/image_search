@@ -22,6 +22,37 @@ def get_protential_tags(image_url,protential_tags,classification_invoke_url,endp
     
     return tag_confidentials
 
+def get_image_embedding(image_url,classification_invoke_url,endpoint_name):
+    url = classification_invoke_url + '/image_classification?'
+    url += ('&url='+image_url)
+    url += ('&endpoint_name='+endpoint_name)
+    url += ('&task=image_embedding')
+
+    print('url:',url)
+    response = requests.get(url)
+    result = response.text
+    result = json.loads(result)
+    #print("result:",result)
+    image_embedding = result['image_embedding']
+
+    return image_embedding
+
+def get_text_embedding(protential_tags,classification_invoke_url,endpoint_name):
+    url = classification_invoke_url + '/image_classification?'
+    url += ('&protential_tags='+protential_tags)
+    url += ('&endpoint_name='+endpoint_name)
+    url += ('&task=text_embedding')
+
+    print('url:',url)
+    response = requests.get(url)
+    result = response.text
+    result = json.loads(result)
+    #print("result:",result)
+    text_embedding = result['text_embedding']
+
+    return text_embedding
+
+
 
 # Re-initialize the chat
 def new_image() -> None:
@@ -29,7 +60,6 @@ def new_image() -> None:
     st.session_state.protential_tags = ''
     
     
-# Sidebar info
 with st.sidebar:
 
     classification_invoke_url = st.text_input(
@@ -42,7 +72,7 @@ with st.sidebar:
         "",
         key="classification_endpoint",
     )
-    
+    task  = st.radio("Task",["classification","image_embedding","text_embedding"])    
 
 # Add a button to start a new chat
 st.sidebar.button("New Image", on_click=new_image, type='primary')
@@ -61,20 +91,24 @@ if st.button('Get Image Category'):
         st.write("classification sagemaker endpoint is None")
     else:
 
-        tag_confidentials = get_protential_tags(st.session_state.url,st.session_state.protential_tags,classification_invoke_url,classification_endpoint) 
-        st.write('tag confidentials')
-        category = [tag for tag in tag_confidentials if tag_confidentials[tag] > threshold]
+        if task == 'classification':
+            tag_confidentials = get_protential_tags(st.session_state.url,st.session_state.protential_tags,classification_invoke_url,classification_endpoint) 
+            st.write('tag confidentials')
+            category = [tag for tag in tag_confidentials if tag_confidentials[tag] > threshold]
         
-        tags = list(tag_confidentials.keys())
-        scores = [round(score,3) for score in tag_confidentials.values()]
-        data = {
-        "category": tags,
-        "scores": scores
-        }
-        df = pd.DataFrame(data)
-        st.dataframe(df)
-        st.write('Category:')
-        st.write(category)
-        
-
-
+            tags = list(tag_confidentials.keys())
+            scores = [round(score,3) for score in tag_confidentials.values()]
+            data = {
+                "category": tags,
+                "scores": scores
+            }
+            df = pd.DataFrame(data)
+            st.dataframe(df)
+            st.write('Category:')
+            st.write(category)
+        elif task == 'image_embedding':
+            image_embedding = get_image_embedding(st.session_state.url,classification_invoke_url,classification_endpoint)
+            st.write(image_embedding)
+        elif task == 'text_embedding':
+            text_embedding = get_text_embedding(st.session_state.protential_tags,classification_invoke_url,classification_endpoint)
+            st.write(text_embedding)
